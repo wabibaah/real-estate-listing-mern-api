@@ -6,6 +6,8 @@ import mongoose from "mongoose";
 import { MONGO_URL } from "./config.js";
 import { PORT } from "./config.js";
 
+import authRoutes from "./routes/authRoutes.js";
+
 const app = express();
 
 // mongodb database
@@ -24,8 +26,7 @@ app.use(express.json());
 app.use(morgan("dev"));
 app.use(cors());
 
-app.get("/", (req, res) => {
-  res.send("hey yey it is working");
-});
+// Routes
+app.use("/api/auth", authRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
