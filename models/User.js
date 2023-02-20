@@ -43,4 +43,4 @@ const schema = new Schema(
   }
 );
 
-export default model("Model", schema);
+export default model("User", schema);
