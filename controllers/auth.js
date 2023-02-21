@@ -38,7 +38,7 @@ export const preRegister = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (user) {
-      return res.json({ error: "Email is taken" });
+      return res.json({ error: `${email} is already taken.` });
     }
     const token = jwt.sign({ email, password }, config.JWT_SECRET, {
       expiresIn: "1h",
@@ -74,7 +74,7 @@ export const register = async (req, res) => {
     const { email, password } = decoded;
     const userExists = await User.findOne({ email });
     if (userExists) {
-      res.json({ error: "Email already taken. Log in instead" });
+      return res.json({ error: "Email already taken. Log in instead" });
     }
     const hashedPassword = await hashPassword(password);
     const user = await new User({
@@ -84,7 +84,6 @@ export const register = async (req, res) => {
     }).save();
     tokenAndUserResponse(req, res, user);
   } catch (err) {
-    console.log(err);
     return res.json({ error: "Something went wrong, please try again" });
   }
 };
@@ -145,7 +144,7 @@ export const forgotPassword = async (req, res) => {
       }
     );
   } catch (err) {
-    res.json({ error: "Something went wrong. Please try again" });
+    return res.json({ error: "Something went wrong. Please try again" });
   }
 };
 
@@ -171,7 +170,7 @@ export const accessAccount = async (req, res) => {
 
 export const refreshToken = async (req, res) => {
   try {
-    const { _id } = jwt.verify(req.headers.refreshToken, config.JWT_SECRET);
+    const { _id } = jwt.verify(req.headers.refresh_token, config.JWT_SECRET);
     const user = await User.findById(_id);
     tokenAndUserResponse(req, res, user);
   } catch (err) {
@@ -184,8 +183,57 @@ export const currentUser = async (req, res) => {
     const user = await User.findById(req.user._id);
     user.password = undefined;
     user.resetCode = undefined;
-    res.json(user);
+    return res.json(user);
   } catch (err) {
     return res.status(403).json({ error: "Unauthorized" });
+  }
+};
+
+export const publicProfile = async (req, res) => {
+  try {
+    const { username } = req.params;
+    const user = await User.findOne({ username });
+    user.password = undefined;
+    user.resetCode = undefined;
+    return res.json(user);
+  } catch (err) {
+    return res.json({ error: "User not found" });
+  }
+};
+
+export const updatePassword = async (req, res) => {
+  try {
+    const { password } = req.body;
+    if (!password) {
+      return res.json({ error: "Password is required" });
+    }
+    if (password && password?.length < 6) {
+      return res.json({ error: "Password should be minimum of 6 characters" });
+    }
+    const user = await User.findByIdAndUpdate(
+      req.user?._id,
+      {
+        password: await hashPassword(password),
+      },
+      { new: true, runValidators: true }
+    );
+    return res.json({ ok: true });
+  } catch (err) {
+    return res.status(403).json({ error: "Unauthorized" });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.user._id, req.body, { new: true });
+    user.password = undefined;
+    user.resetCode = undefined;
+    return res.json(user);
+  } catch (err) {
+    if (err.codeName === "DuplicateKey") {
+      return res.json({ error: "Username is already taken, please try another one" });
+    } else {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
   }
 };
