@@ -6,5 +6,6 @@ import { requireSignIn } from "../middlewares/auth.js";
 
 router.post("/upload-image", requireSignIn, ad.uploadImage);
 router.post("/remove-image", requireSignIn, ad.removeImage);
+router.post("/create", requireSignIn, ad.createAd);
 
 export default router;
