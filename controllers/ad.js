@@ -14,7 +14,7 @@ export const uploadImage = async (req, res) => {
       ContentEncoding: "base64",
       ContentType: `image/${type}`,
     };
-    config.AWS3.upload(params, (err, data) => {
+    config.AWSS3.upload(params, (err, data) => {
       if (err) {
         res.sendStatus(400);
       } else {
@@ -24,4 +24,16 @@ export const uploadImage = async (req, res) => {
   } catch (err) {
     res.json({ error: "Upload failed. Try again" });
   }
+};
+
+export const removeImage = async (req, res) => {
+  // // const { Key, Bucket } = req.body;
+  // // config.AWSS3.deleteObject({ Bucket, Key }, (err, data) => {
+  // //   if (err) {
+  // //     res.sendStatus(400);
+  // //   } else {
+  // //     res.send({ ok: true });
+  // //   }
+  // });
+  res.send("i am in");
 };
