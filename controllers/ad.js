@@ -88,3 +88,75 @@ export const createAd = async (req, res) => {
     res.json({ error: "Something went wrong" });
   }
 };
+
+export const getAds = async (req, res) => {
+  try {
+    const adsForSell = await Ad.find({ action: "Sell" })
+      .select("-googleMap -location -photo.Key -photo.key -photo.ETag ")
+      .sort({ createdAt: -1 })
+      .limit(12);
+
+    const adsForRent = await Ad.find({ action: "Rent" })
+      .select("-googleMap -location -photo.Key -photo.key -photo.ETag ")
+      .sort({ createdAt: -1 })
+      .limit(12);
+
+    res.json({ adsForRent, adsForSell });
+  } catch (err) {
+    res.json({ error: "" });
+  }
+};
+
+export const getAd = async (req, res) => {
+  const slug = req.params.slug;
+  try {
+    const ad = await Ad.findOne({ slug }).populate(
+      "postedBy",
+      "name username email phone company photo.Location "
+    );
+    // do more research on this bro, i really beg you
+    const related = await Ad.find({
+      _id: { $ne: ad._id },
+      action: ad.action,
+      type: ad.type,
+      address: {
+        $regex: ad.googleMap[0].city,
+        $options: "i",
+      },
+    })
+      .limit(3)
+      .select("-photos.Key -photos.key -photos.ETag -photos.Bucket -googleMap ");
+    res.json({ ad, related });
+  } catch (err) {}
+};
+
+export const addToWishlist = async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $addToSet: { wishlist: req.body.adId },
+      },
+      { new: true, runValidators: true }
+    );
+    const { password, resetCode, ...rest } = user._doc;
+    res.json({ user: rest });
+  } catch (err) {
+    console.log(err);
+  }
+};
+export const removeFromWishlist = async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $pull: { wishlist: req.params.adId },
+      },
+      { new: true, runValidators: true }
+    );
+    const { password, resetCode, ...rest } = user._doc;
+    res.json({ user: rest });
+  } catch (err) {
+    console.log(err);
+  }
+};
