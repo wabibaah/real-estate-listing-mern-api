@@ -115,12 +115,13 @@ export const getAd = async (req, res) => {
       "name username email phone company photo.Location "
     );
     // do more research on this bro, i really beg you
+    // you can allow the users to enable their location so that the app can pick it up from there
     const related = await Ad.find({
       _id: { $ne: ad._id },
       action: ad.action,
       type: ad.type,
       address: {
-        $regex: ad.googleMap[0].city,
+        $regex: ad.googleMap[0]?.administrativeLevels?.level2long || "",
         $options: "i",
       },
     })
