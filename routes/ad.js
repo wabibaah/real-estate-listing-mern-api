@@ -11,5 +11,6 @@ router.get("/get-ads", ad.getAds);
 router.get("/get-ad/:slug", ad.getAd);
 router.post("/wishlist", requireSignIn, ad.addToWishlist);
 router.delete("/wishlist/:adId", requireSignIn, ad.removeFromWishlist);
+router.post("/contact-seller", requireSignIn, ad.contactSeller);
 
 export default router;
