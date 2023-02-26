@@ -28,6 +28,7 @@ const schema = new Schema(
     },
     address: { type: String, default: "" },
     company: { type: String, default: "" },
+    // decide on when to make phone number unique or not but i think it should be unique (for security reasons)
     phone: { type: String, default: "" },
     role: {
       type: [String],

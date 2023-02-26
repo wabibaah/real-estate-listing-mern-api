@@ -166,8 +166,7 @@ export const removeFromWishlist = async (req, res) => {
 export const contactSeller = async (req, res) => {
   // if we want the server to work more, we can do a require sign in for this route and take the user info there rather that directly from the frontend
   // this is the place where we can also the person doing the enquiry too message as well
-  // in the frontend , make it in such a way that if you are the owner or postecBy , you will not see the enquiry button
-
+  // in the frontend , make it in such a way that if you are the owner or postedBy , you will not see the enquiry button
   const { name, email, message, phone, adId } = req.body;
   const ad = await Ad.findById(adId).populate("postedBy", "email");
   if (!ad) {
@@ -206,5 +205,23 @@ export const contactSeller = async (req, res) => {
         }
       }
     );
+  }
+};
+
+export const getUserAds = async (req, res) => {
+  try {
+    const perPage = 2; // change this later to maybe 6 or 10
+    const page = req.params.page ? req.params.page : 1;
+    const total = await Ad.find({ postedBy: req.user._id });
+    const ads = await Ad.find({ postedBy: req.user._id })
+      // .select("-photos.Key -photos.key -photos.ETag -photos.Bucket -location -googleMap")
+      .populate("postedBy", "name email username phone company")
+      .skip((page - 1) * perPage)
+      .limit(perPage)
+      .sort({ createdAt: -1 });
+
+    res.json({ ads, total: total.length });
+  } catch (err) {
+    console.log(err);
   }
 };
