@@ -273,3 +273,19 @@ export const editAd = async (req, res) => {
     console.log(err);
   }
 };
+
+export const deleteAd = async (req, res) => {
+  try {
+    const ad = await Ad.findById(req.params.adId);
+    const owner = req.user._id == ad.postedBy; // the variable name can be isOwner and the comparisnon can be "===" (3) not (2)
+    if (!owner) {
+      return res.json({ error: "Permission denied, you are not the owner of this Listing" });
+    } else {
+      await Ad.findByIdAndDelete(ad._id); // a lot of redundant going and coming just say ad.remove or delete
+      res.json({ ok: true });
+      // in the frontend you can do the check if they are not the owners, the cannot even see the delete button
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
