@@ -16,4 +16,7 @@ router.get("/get-user-ads/:page", requireSignIn, ad.getUserAds);
 router.put("/edit/:adId", requireSignIn, ad.editAd);
 router.delete("/delete/:adId", requireSignIn, ad.deleteAd);
 
+router.get("/enquiries", requireSignIn, ad.enquiredProperties);
+router.get("/wishlist", requireSignIn, ad.wishlist);
+
 export default router;

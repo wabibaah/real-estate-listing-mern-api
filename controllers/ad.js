@@ -289,3 +289,25 @@ export const deleteAd = async (req, res) => {
     console.log(err);
   }
 };
+
+export const enquiredProperties = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    // why didn't we do populate over here, because this looks like a cool and better way
+    const enquiredAds = await Ad.find({ _id: user.enquiredProperties }).sort({ createdAt: -1 });
+    res.json(enquiredAds);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const wishlist = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    // i think this is what we were doing in django reverse model blah blah blah, i mean this is so cool and beautiful
+    const wishlist = await Ad.find({ _id: user.wishlist }).sort({ createdAt: -1 });
+    res.json(wishlist);
+  } catch (err) {
+    console.log(err);
+  }
+};
