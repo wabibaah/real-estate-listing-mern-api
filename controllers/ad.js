@@ -225,3 +225,51 @@ export const getUserAds = async (req, res) => {
     console.log(err);
   }
 };
+
+export const editAd = async (req, res) => {
+  // look for a special way to send the res well not the one that will be captured in an else block that if there is no error
+  try {
+    const { photos, price, type, address, description } = req.body;
+
+    const ad = await Ad.findById(req.params.adId);
+    if (!ad) {
+      return res.json({ error: "Add not found" });
+    }
+    const owner = req.user._id == ad?.postedBy;
+
+    if (!owner) {
+      return res.json({
+        error: "Access denied, you did not create this ad so you can not edit it",
+      });
+    } else {
+      if (!photos.length) {
+        return res.json({ error: "Photos are required" });
+      }
+      if (!price) {
+        return res.json({ error: "Price is required" });
+      }
+      if (!type) {
+        return res.json({ error: "Is property House or Land?" });
+      }
+      if (!address) {
+        return res.json({ error: "Address is required" });
+      }
+      if (!description) {
+        return res.json({ error: "Description is required" });
+      }
+
+      const geo = await config.GOOGLE_GEOCODER.geocode(address);
+      const updatedAd = await ad.update({
+        ...req.body,
+        slug: ad.slug,
+        location: {
+          type: "Point",
+          coordinates: [geo?.[0]?.longitude, geo?.[0]?.latitude],
+        },
+      });
+      res.json({ ok: true });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
