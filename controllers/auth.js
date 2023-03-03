@@ -6,6 +6,7 @@ import * as config from "../config.js";
 import { emailTemplate } from "../helpers/email.js";
 import { hashPassword, comparePassword } from "../helpers/auth.js";
 import User from "../models/User.js";
+import Ad from "../models/Ad.js";
 
 const tokenAndUserResponse = (req, res, user) => {
   const token = jwt.sign({ _id: user._id }, config.JWT_SECRET, { expiresIn: "1h" });
@@ -237,3 +238,38 @@ export const updateProfile = async (req, res) => {
     }
   }
 };
+
+export const getAgents = async (req, res) => {
+  try {
+    const agents = await User.find({ role: "Seller" }).select(
+      "-password -role -enquiredProperties  -wishlist -photo.Key -photo.key -photo.Bucket"
+    );
+    res.json(agents);
+  } catch (err) {
+    console.log(err);
+  }
+};
+export const agentAdCount = async (req, res) => {
+  try {
+    const ads = await Ad.find({ postedBy: req.params.agentId }).select("_id");
+    res.json(ads);
+  } catch (err) {
+    console.log(err);
+  }
+};
+export const getAgent = async (req, res) => {
+  try {
+    const agent = await User.findOne({ username: req.params.username }).select(
+      "-password -role -enquiredProperties  -wishlist -photo.Key -photo.key -photo.Bucket"
+    );
+    const ads = await Ad.find({ postedBy: agent._id }).select(
+      "-photos.Key -photos.key -photos.Bucket photos.ETag -location -googleMap"
+    );
+    res.json({ agent, ads });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// the refresh token only works when i refresh the page, how can i solve this issue
+// watch more videos on use authentication and more

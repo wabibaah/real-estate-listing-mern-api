@@ -19,4 +19,7 @@ router.delete("/delete/:adId", requireSignIn, ad.deleteAd);
 router.get("/enquiries", requireSignIn, ad.enquiredProperties);
 router.get("/wishlist", requireSignIn, ad.wishlist);
 
+router.get("/ads-for-sell", ad.adsForSell);
+router.get("/ads-for-rent", ad.adsForRent);
+
 export default router;
