@@ -336,3 +336,33 @@ export const adsForSell = async (req, res) => {
     res.json({ error: "" });
   }
 };
+
+export const search = async (req, res) => {
+  try {
+    const { action, address, type, priceRange } = req.query;
+    const geo = await config.GOOGLE_GEOCODER.geocode(address);
+    const ads = await Ad.find({
+      action: action === "Buy" ? "Sell" : "Rent",
+      type,
+      price: {
+        $gte: parseInt(priceRange[0]),
+        $lte: parseInt(priceRange[1]),
+      },
+      location: {
+        $near: {
+          $maxDistance: 50000, // 1000m = 1km
+          $geometry: {
+            type: "Point",
+            coordinates: [geo?.[0]?.longitude, geo?.[0]?.latitude],
+          },
+        },
+      },
+    })
+      .limit(24)
+      .sort({ createdAt: -1 })
+      .select("-photos.Key -photos.key -photos.ETag -photos.Bucket -location -googleMap");
+    res.json(ads);
+  } catch (err) {
+    console.log(err);
+  }
+};

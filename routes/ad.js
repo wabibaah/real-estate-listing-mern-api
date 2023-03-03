@@ -22,4 +22,7 @@ router.get("/wishlist", requireSignIn, ad.wishlist);
 router.get("/ads-for-sell", ad.adsForSell);
 router.get("/ads-for-rent", ad.adsForRent);
 
+// search for properties based on nearby location
+router.get("/search", ad.search);
+
 export default router;
